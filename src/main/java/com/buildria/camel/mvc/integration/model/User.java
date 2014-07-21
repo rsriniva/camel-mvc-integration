@@ -2,8 +2,12 @@ package com.buildria.camel.mvc.integration.model;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.validator.constraints.Range;
 
+@XmlRootElement(name = "user")
 public class User {
 
     @NotNull
@@ -18,6 +22,7 @@ public class User {
     @Range(min = 10, max = 99)
     private int age;
 
+    @XmlAttribute(name = "id")
     public String getId() {
         return id;
     }
@@ -26,6 +31,7 @@ public class User {
         this.id = id;
     }
 
+    @XmlElement(name = "name")
     public String getName() {
         return name;
     }
@@ -34,6 +40,7 @@ public class User {
         this.name = name;
     }
 
+    @XmlElement(name = "age")
     public int getAge() {
         return age;
     }

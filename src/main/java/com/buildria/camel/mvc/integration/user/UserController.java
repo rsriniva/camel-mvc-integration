@@ -4,8 +4,13 @@ import com.buildria.camel.mvc.integration.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Valid;
+import org.apache.camel.ExchangePattern;
+import org.apache.camel.ProducerTemplate;
+import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -19,21 +24,29 @@ import org.springframework.web.servlet.ModelAndView;
 public class UserController {
 
     private final Logger LOG = LoggerFactory.getLogger(getClass());
-    
+
     private static final String EDIT_INPUT = "userEditInput";
-    
+
     private static final String EDIT_CONFIRM = "userEditConfirm";
 
     private static final String EDIT_COMPLETE = "userEditComplete";
 
+    @Autowired
+    private ApplicationContext context;
+
     @ModelAttribute("userForm")
     public UserForm initForm(@RequestParam(required = false, value = "user.id") String id) {
         UserForm userForm = new UserForm();
-        User user = new User();
-        userForm.setUser(user);
+        User user;
         if (id != null) {
-            user.setId(id);
+            ProducerTemplate template = context.getBean("producerTemplate", ProducerTemplate.class);
+            user = (User) template.sendBodyAndHeader("direct:user_edit", ExchangePattern.InOut,
+                    null, "id", id);
+            Log.info("======= {}", user.toString());
+        } else {
+            user = new User();
         }
+        userForm.setUser(user);
         return userForm;
     }
 
@@ -51,32 +64,36 @@ public class UserController {
     public ModelAndView confirm(@Valid final UserForm userForm, BindingResult result) {
         LOG.info(userForm.toString());
         Map<String, Object> obj = new HashMap<String, Object>() {
-                {
-                    put("user", userForm.getUser());
-                }
+            {
+                put("user", userForm.getUser());
+            }
         };
         if (result.hasErrors()) {
             return new ModelAndView(EDIT_INPUT, obj);
         }
-        
+
         return new ModelAndView(EDIT_CONFIRM, obj);
     }
 
     @RequestMapping(value = "edit/complete", method = RequestMethod.POST)
     public ModelAndView complete(@Valid final UserForm userForm, BindingResult result) {
         LOG.info(userForm.toString());
-        Map<String, Object> obj = new HashMap<String, Object>() {
+
+        if (result.hasErrors()) {
+            return new ModelAndView(EDIT_INPUT, new HashMap<String, Object>() {
                 {
                     put("user", userForm.getUser());
                 }
-        };
-        if (result.hasErrors()) {
-            return new ModelAndView(EDIT_INPUT, obj);
+            });
         }
-        
-        return new ModelAndView(EDIT_COMPLETE);
+
+        return new ModelAndView(EDIT_COMPLETE, new HashMap<String, Object>() {
+            {
+                put("user", userForm.getUser());
+            }
+        });
     }
-    
+
     public static class UserForm {
 
         @Valid
@@ -94,6 +111,6 @@ public class UserController {
         public String toString() {
             return "UserForm{" + "user=" + user + '}';
         }
-        
+
     }
 }
