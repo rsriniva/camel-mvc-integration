@@ -32,14 +32,13 @@ public class UserController {
     private static final String EDIT_COMPLETE = "userEditComplete";
 
     @Autowired
-    private ApplicationContext context;
-
+    private ProducerTemplate template;
+    
     @ModelAttribute("userForm")
     public UserForm initForm(@RequestParam(required = false, value = "user.id") String id) {
         UserForm userForm = new UserForm();
         User user;
         if (id != null) {
-            ProducerTemplate template = context.getBean("producerTemplate", ProducerTemplate.class);
             user = (User) template.sendBodyAndHeader("direct:user_edit", ExchangePattern.InOut,
                     null, "id", id);
             Log.info("======= {}", user.toString());
