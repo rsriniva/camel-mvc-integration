@@ -132,6 +132,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.1.2.v20140210</version>
                 <configuration>
+                    <jvmArgs>-Xmx1024m</jvmArgs>
                     <webAppConfig>
                         <contextPath>/</contextPath>
                     </webAppConfig>
@@ -142,7 +143,7 @@
                             <value/>
                         </systemProperty>
                     </systemProperties>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <scanIntervalSeconds>5</scanIntervalSeconds>
                 </configuration>
             </plugin>
 
