@@ -6,11 +6,9 @@ import java.util.Map;
 import javax.validation.Valid;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ProducerTemplate;
-import org.eclipse.jetty.util.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -41,7 +39,6 @@ public class UserController {
         if (id != null) {
             user = (User) template.sendBodyAndHeader("direct:user_edit", ExchangePattern.InOut,
                     null, "id", id);
-            Log.info("======= {}", user.toString());
         } else {
             user = new User();
         }

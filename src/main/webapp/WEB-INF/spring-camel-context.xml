@@ -12,14 +12,14 @@
 
     <cxf:rsServer id="rsServer" 
                   address="http://localhost:9999/rest" 
-                  loggingFeatureEnabled="true" 
+                  loggingFeatureEnabled="false" 
                   loggingSizeLimit="200" 
                   skipFaultLogging="true">
     </cxf:rsServer>
    
     <cxf:rsClient id="rsClient" 
                   address="http://localhost:9999/rest"
-                  loggingFeatureEnabled="true" 
+                  loggingFeatureEnabled="false" 
                   skipFaultLogging="true"/>
 
     <camelContext xmlns="http://camel.apache.org/schema/spring">
@@ -32,9 +32,9 @@
         <endpoint id="rsClientEndpoint" 
               uri="cxfrs://bean://rsClient" />
         
+        <!-- SpringMVCから呼ばれるルート -->
         <route>
             <from uri="direct:user_edit"/>
-            <log message="AAAA: ${body}" />
             <setHeader headerName="operationName">
                 <constant>getUser</constant>
             </setHeader>
@@ -50,13 +50,11 @@
             <setHeader headerName="CamelCxfRsResponseClass">
                 <constant>com.buildria.camel.mvc.integration.model.User</constant>
             </setHeader>
-            <setBody>
-                <constant>AAA</constant>
-            </setBody>
             <to ref="rsClientEndpoint" pattern="InOut"/>
             <log message="${body}" />
         </route>
         
+        <!-- RESTサーバ -->
         <route>
             <from ref="rsServerEndpoint" />
             <choice>
@@ -71,6 +69,7 @@
                     </setHeader>
                 </otherwise>
             </choice>
+            <log message="REST called. ${body}" />
         </route>        
         
     </camelContext>
