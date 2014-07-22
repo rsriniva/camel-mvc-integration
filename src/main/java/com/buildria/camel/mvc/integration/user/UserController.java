@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,41 +28,27 @@ public class UserController {
 
     private static final String EDIT_COMPLETE = "userEditComplete";
 
+    private static final String MODEL = "userForm";
+    
     @Autowired
     private ProducerTemplate template;
-    
-    @ModelAttribute("userForm")
-    public UserForm initForm(@RequestParam(required = false, value = "user.id") String id) {
-        UserForm userForm = new UserForm();
-        User user;
-        if (id != null) {
-            user = (User) template.sendBodyAndHeader("direct:user_edit", ExchangePattern.InOut,
-                    null, "id", id);
-        } else {
-            user = new User();
-        }
-        userForm.setUser(user);
-        return userForm;
-    }
 
     @RequestMapping(value = "edit/input", method = RequestMethod.GET)
-    public ModelAndView input(final UserForm userForm) {
-        LOG.info(userForm.toString());
-        return new ModelAndView(EDIT_INPUT, new HashMap<String, Object>() {
-            {
-                put("user", userForm.getUser());
-            }
-        });
+    public ModelAndView input(@RequestParam(required = true, value = "user.id") String id, UserForm userForm) {
+        if (id != null) {
+            User user = (User) template.sendBodyAndHeader("direct:user_edit", ExchangePattern.InOut, null, "id", id);
+            userForm.setUser(user);
+        }
+        Map<String, Object> obj = new HashMap<>();
+        obj.put(MODEL, userForm);
+        return new ModelAndView(EDIT_INPUT, obj);
     }
 
     @RequestMapping(value = "edit/confirm", method = RequestMethod.POST)
-    public ModelAndView confirm(@Valid final UserForm userForm, BindingResult result) {
-        LOG.info(userForm.toString());
-        Map<String, Object> obj = new HashMap<String, Object>() {
-            {
-                put("user", userForm.getUser());
-            }
-        };
+    public ModelAndView confirm(@Valid UserForm userForm, BindingResult result) {
+        Map<String, Object> obj = new HashMap<>();
+        obj.put(MODEL, userForm);
+
         if (result.hasErrors()) {
             return new ModelAndView(EDIT_INPUT, obj);
         }
@@ -72,22 +57,15 @@ public class UserController {
     }
 
     @RequestMapping(value = "edit/complete", method = RequestMethod.POST)
-    public ModelAndView complete(@Valid final UserForm userForm, BindingResult result) {
-        LOG.info(userForm.toString());
+    public ModelAndView complete(@Valid UserForm userForm, BindingResult result) {
+        Map<String, Object> obj = new HashMap<>();
+        obj.put(MODEL, userForm);
 
         if (result.hasErrors()) {
-            return new ModelAndView(EDIT_INPUT, new HashMap<String, Object>() {
-                {
-                    put("user", userForm.getUser());
-                }
-            });
+            return new ModelAndView(EDIT_INPUT, obj);
         }
 
-        return new ModelAndView(EDIT_COMPLETE, new HashMap<String, Object>() {
-            {
-                put("user", userForm.getUser());
-            }
-        });
+        return new ModelAndView(EDIT_COMPLETE, obj);
     }
 
     public static class UserForm {
