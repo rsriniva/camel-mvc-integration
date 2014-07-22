@@ -35,9 +35,6 @@
         <!-- SpringMVCから呼ばれるルート -->
         <route>
             <from uri="direct:user_edit"/>
-            <setHeader headerName="operationName">
-                <constant>getUser</constant>
-            </setHeader>
             <setHeader headerName="CamelCxfRsUsingHttpAPI">
                 <constant>true</constant>
             </setHeader>
