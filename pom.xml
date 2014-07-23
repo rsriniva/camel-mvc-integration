@@ -132,7 +132,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.1.2.v20140210</version>
                 <configuration>
-                    <jvmArgs>-Xmx1024m</jvmArgs>
+                    <jvmArgs>-server -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m</jvmArgs>
                     <webAppConfig>
                         <contextPath>/</contextPath>
                     </webAppConfig>
