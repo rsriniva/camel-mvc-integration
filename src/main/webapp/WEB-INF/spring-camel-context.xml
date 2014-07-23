@@ -35,9 +35,6 @@
         <!-- SpringMVCから呼ばれるルート -->
         <route>
             <from uri="direct:user_edit"/>
-            <setHeader headerName="CamelCxfRsUsingHttpAPI">
-                <constant>true</constant>
-            </setHeader>
             <setHeader headerName="CamelHttpMethod">
                 <constant>GET</constant>
             </setHeader>
